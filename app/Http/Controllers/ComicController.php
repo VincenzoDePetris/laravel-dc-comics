@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Comic;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Validator;
+
 class ComicController extends Controller
 {
     /**
@@ -36,7 +38,7 @@ class ComicController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->all();
+        $data = $this->validation($request->all());
         $comic = new Comic;
         $comic->fill($data);
         $comic->save();
@@ -74,7 +76,7 @@ class ComicController extends Controller
      */
     public function update(Request $request, Comic $comic)
     {
-        $data = $request->all();
+        $data = $this->validation($request->all(), $comic->id);
         $comic->update($data);
         return redirect()->route('comics.show', $comic);
     }
@@ -90,4 +92,38 @@ class ComicController extends Controller
         $comic->delete();
         return redirect()->route('comics.index');
     }
+
+    private function validation($data) {
+        $validator = Validator::make(
+          $data,
+          [
+            'title' => 'required|string|max:40',
+            'series' => 'required|string|max:40',
+            "type" => "required|string|in:comic,graphic",
+            "price" => "required|string|max:10",
+            "thumb" => "nullable|string",
+            "sale_date"=>'required|date_format:Y-m-d H:i:s',
+            "description" => "nullable|string"
+          ],
+          [
+            'title.required' => 'Il titolo è obbligatorio',
+            'title.string' => 'Il titolo deve essere una stringa',
+            'title.max' => 'Il titolo deve massimo di 40 caratteri',
+      
+            'type.required' => 'Il tipo è obbligatorio',
+            'type.integer' => 'Il tipo deve essere scelto tra graphic novel o comic',
+      
+            'price.required' => 'Il prezzo è obbligatorio',
+            'price.in' => 'Il prezzo deve essere una stringa',
+      
+            'sale_date.required' => 'La data di sconto è obbligatoria',
+      
+            'thumb.string' => 'L\'immagine deve essere una stringa',
+      
+            'description.string' => 'La descrizione deve essere una stringa',
+          ]
+        )->validate();
+      
+        return $validator;
+      }
 }
