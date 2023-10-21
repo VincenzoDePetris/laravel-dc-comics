@@ -16,8 +16,10 @@
 
   <main>
     @yield('main-content')
-    @yield('comics')
   </main>
+  <div>
+    @yield('comics')
+  </div>
 
 </body>
 
